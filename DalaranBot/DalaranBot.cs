@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using Discord;
 
@@ -9,17 +10,54 @@ namespace DalaranBot
     public class DalaranBot
     {
         private readonly DiscordClient client;
+        private readonly DateTime startTime;
 
         public string Token { get; }
 
+        public TimeSpan Uptime => DateTime.Now - startTime;
+        public string BotVersion => "DalaranBot Version " + Assembly.GetExecutingAssembly().GetName().Version.ToString(3);
+
+        public string UptimeMessage
+        {
+            get
+            {
+                var sb = new StringBuilder("I've been up for ");
+
+                if (Uptime.Days != 0)
+                    sb.Append(Uptime.Days + "d ");
+
+                if (Uptime.Hours != 0)
+                    sb.Append(Uptime.Hours + "h ");
+
+                if (Uptime.Minutes != 0)
+                    sb.Append(Uptime.Minutes + "m ");
+
+                if (Uptime.Seconds != 0)
+                    sb.Append(Uptime.Seconds + "s ");
+
+                sb.Append(Uptime.Milliseconds + "ms");
+
+                return sb.ToString();
+            }
+        }
+
+        /// <summary>
+        /// Creates a new Dalaran Bot
+        /// </summary>
+        /// <param name="token"></param>
         public DalaranBot(string token)
         {
             Token = token;
 
             client = new DiscordClient();
             client.MessageReceived += Client_MessageReceived;
+
+            startTime = DateTime.Now;
         }
 
+        /// <summary>
+        /// Connect to Discord
+        /// </summary>
         public void Start()
         {
             client.ExecuteAndWait(async () =>
@@ -28,6 +66,7 @@ namespace DalaranBot
             });
         }
 
+        #region Event Handlers
         private void Client_MessageReceived(object sender, MessageEventArgs e)
         {
             // Do nothing if we wrote the message, or if it doesn't start with the comnmand character
@@ -48,8 +87,17 @@ namespace DalaranBot
                 case "roll":
                     cmdChannel.SendMessage(GetRoll(cmdUser, cmdBody));
                     break;
+
+                case "uptime":
+                    cmdChannel.SendMessage(UptimeMessage);
+                    break;
+
+                case "version":
+                    cmdChannel.SendMessage(BotVersion);
+                    break;
             }
         }
+        #endregion
 
         #region Command Methods
         private static string GetRoll(User callee, string command)
