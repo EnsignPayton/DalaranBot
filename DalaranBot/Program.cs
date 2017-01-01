@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
+using System.Reflection;
 
 namespace DalaranBot
 {
@@ -9,6 +11,9 @@ namespace DalaranBot
             string token = GetToken("../../keys.txt");
 
             if (string.IsNullOrWhiteSpace(token)) return;
+
+            Console.WriteLine("Starting DalaranBot v{0}",
+                Assembly.GetExecutingAssembly().GetName().Version.ToString(3));
 
             var bot = new DalaranBot(token);
             bot.Start();
