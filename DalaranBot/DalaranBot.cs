@@ -12,6 +12,7 @@ namespace DalaranBot
         private readonly DiscordClient client = new DiscordClient();
         private readonly DateTime startTime = DateTime.Now;
         private readonly VotingManager voteMgr = new VotingManager();
+        private readonly LoggingManager logMgr = new LoggingManager();
 
         #region Properties
         public string Token { get; }
@@ -87,7 +88,7 @@ namespace DalaranBot
             var cmdType = e.Message.Text.Substring(1).Split(' ')[0];
             var cmdBody = e.Message.Text.Substring(1 + cmdType.Length).Trim();
 
-            Log($".{cmdType} {cmdBody}", cmdUser.Name);
+            logMgr.Log($".{cmdType} {cmdBody}", cmdUser);
 
             switch (cmdType)
             {
@@ -127,16 +128,11 @@ namespace DalaranBot
         }
         #endregion
 
-        private static void SendMessage(Channel channel, string msg)
+        private void SendMessage(Channel channel, string msg)
         {
             if (string.IsNullOrEmpty(msg)) return;
-            Log(msg);
+            logMgr.Log(msg);
             channel.SendMessage(msg);
-        }
-
-        private static void Log(string text, string user = "BOT")
-        {
-            Console.WriteLine($"{user}: {text}");
         }
 
         #region Command Methods
