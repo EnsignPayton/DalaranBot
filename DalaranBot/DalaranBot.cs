@@ -21,13 +21,13 @@ namespace DalaranBot
             Assembly.GetExecutingAssembly().GetName().Version.ToString(3);
 
         public string HelpText => @"Useful Commands
-.version     Prints the version
-.uptime      Prints the bot's uptime
-.echo          Make me say stuff
-.roll             Roll dice in the d20 syntax
-.votestart  Starts a new vote
-.vote           Votes for a category
-.votestop   Stops an ongoing vote";
+`.version      Prints the version
+.uptime       Prints the bot's uptime
+.echo         Make me say stuff
+.roll         Roll dice in the d20 syntax
+.votestart    Starts a new vote
+.vote         Votes for a category
+.votestop     Stops an ongoing vote`";
 
         public string UptimeMessage
         {
@@ -170,6 +170,26 @@ namespace DalaranBot
                     var diceValues = RollDice(numDice, typeDice);
                     results.AddRange(diceValues);
                 }
+                else if (roll.Contains("-"))
+                {
+                    // Range-based rolling
+                    int iFrom, iTo;
+                    var nums = roll.Split('-');
+
+                    if (!int.TryParse(nums[0], out iFrom))
+                    {
+                        isError = true;
+                        break;
+                    }
+
+                    if (!int.TryParse(nums[1], out iTo))
+                    {
+                        isError = true;
+                        break;
+                    }
+
+                    results.Add(RollRange(iFrom, iTo));
+                }
                 else
                 {
                     // We're adding a modifier
@@ -219,6 +239,13 @@ namespace DalaranBot
                 results.Add(rand.Next(type) + 1);
 
             return results;
+        }
+
+        private static int RollRange(int iFrom, int iTo)
+        {
+            var rand = new Random();
+
+            return rand.Next(iFrom, iTo);
         }
         #endregion
     }
