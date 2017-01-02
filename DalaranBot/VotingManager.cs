@@ -18,17 +18,20 @@ namespace DalaranBot
         {
             if (isVoting) return "Voting has already started.";
 
-            isVoting = true;
-
             var catTexts = cmd.Split('"').Where(s => !string.IsNullOrWhiteSpace(s));
 
             foreach (var cat in catTexts)
                 categories.Add(new Category { Text = cat });
 
+            if (categories.Count == 0)
+                return "No categories specified.";
+
             var sb = new StringBuilder("Voting has started:");
 
             for (var i = 0; i < categories.Count; i++)
                 sb.Append($"\n{i + 1}. {categories[i].Text}");
+
+            isVoting = true;
 
             return sb.ToString();
         }
@@ -57,8 +60,6 @@ namespace DalaranBot
         {
             if (!isVoting) return "There are no votes in progress to stop.";
 
-            isVoting = false;
-
             var maxCats = categories.GetMaxCategories();
             var sb = new StringBuilder("Voting has ended.");
 
@@ -71,6 +72,8 @@ namespace DalaranBot
                 sb.Append($"{categories[i].Votes} Vote");
                 if (categories[i].Votes != 1) sb.Append("s");
                 sb.Append($" ({(int)((double)categories[i].Votes / (double)totalVotes * 100.0)}%)");
+
+                isVoting = false;
 
                 if (maxCats.Contains(categories[i])) sb.Append("**");
             }
