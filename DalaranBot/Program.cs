@@ -10,7 +10,11 @@ namespace DalaranBot
         {
             string token = GetToken("../../keys.txt");
 
-            if (string.IsNullOrWhiteSpace(token)) return;
+            if (string.IsNullOrWhiteSpace(token))
+            {
+                Console.WriteLine("Invalid Credentials. Shutting down...");
+                return;
+            }
 
             Console.WriteLine("Starting DalaranBot v{0}",
                 Assembly.GetExecutingAssembly().GetName().Version.ToString(3));

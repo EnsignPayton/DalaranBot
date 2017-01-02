@@ -9,13 +9,22 @@ namespace DalaranBot
 {
     public class DalaranBot
     {
-        private readonly DiscordClient client;
-        private readonly DateTime startTime;
+        private readonly DiscordClient client = new DiscordClient();
+        private readonly DateTime startTime = DateTime.Now;
+        private readonly VotingManager voteMgr = new VotingManager();
 
+        #region Properties
         public string Token { get; }
 
         public TimeSpan Uptime => DateTime.Now - startTime;
-        public string BotVersion => "DalaranBot Version " + Assembly.GetExecutingAssembly().GetName().Version.ToString(3);
+        public string BotVersion => "DalaranBot Version " +
+            Assembly.GetExecutingAssembly().GetName().Version.ToString(3);
+
+        public string HelpText => @"Useful Commands
+.echo          Make me say stuff
+.roll             Roll dice in the d20 syntax
+.version     Prints the version
+.uptime      Prints the bot's uptime";
 
         public string UptimeMessage
         {
@@ -40,19 +49,17 @@ namespace DalaranBot
                 return sb.ToString();
             }
         }
+        #endregion Properties
 
         /// <summary>
         /// Creates a new Dalaran Bot
         /// </summary>
-        /// <param name="token"></param>
+        /// <param name="token">OAuth Token</param>
         public DalaranBot(string token)
         {
             Token = token;
 
-            client = new DiscordClient();
             client.MessageReceived += Client_MessageReceived;
-
-            startTime = DateTime.Now;
         }
 
         /// <summary>
@@ -79,6 +86,10 @@ namespace DalaranBot
 
             switch (cmdType)
             {
+                case "help":
+                    cmdChannel.SendMessage(HelpText);
+                    break;
+
                 case "echo":
                     e.Message.Delete();
                     cmdChannel.SendMessage(cmdBody);
@@ -94,6 +105,20 @@ namespace DalaranBot
 
                 case "version":
                     cmdChannel.SendMessage(BotVersion);
+                    break;
+
+                case "votestart":
+                    cmdChannel.SendMessage(voteMgr.Start(cmdBody));
+                    break;
+
+                case "vote":
+                    var msg = voteMgr.AddVote(cmdBody);
+                    if (!string.IsNullOrEmpty(msg))
+                        cmdChannel.SendMessage(msg);
+                    break;
+
+                case "votestop":
+                    cmdChannel.SendMessage(voteMgr.Stop());
                     break;
             }
         }
