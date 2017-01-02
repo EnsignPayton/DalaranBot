@@ -21,10 +21,13 @@ namespace DalaranBot
             Assembly.GetExecutingAssembly().GetName().Version.ToString(3);
 
         public string HelpText => @"Useful Commands
+.version     Prints the version
+.uptime      Prints the bot's uptime
 .echo          Make me say stuff
 .roll             Roll dice in the d20 syntax
-.version     Prints the version
-.uptime      Prints the bot's uptime";
+.votestart  Starts a new vote
+.vote           Votes for a category
+.votestop   Stops an ongoing vote";
 
         public string UptimeMessage
         {
