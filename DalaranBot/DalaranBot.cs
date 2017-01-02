@@ -87,45 +87,57 @@ namespace DalaranBot
             var cmdType = e.Message.Text.Substring(1).Split(' ')[0];
             var cmdBody = e.Message.Text.Substring(1 + cmdType.Length).Trim();
 
+            Log($".{cmdType} {cmdBody}", cmdUser.Name);
+
             switch (cmdType)
             {
                 case "help":
-                    cmdChannel.SendMessage(HelpText);
+                    SendMessage(cmdChannel, HelpText);
                     break;
 
                 case "echo":
                     e.Message.Delete();
-                    cmdChannel.SendMessage(cmdBody);
+                    SendMessage(cmdChannel, cmdBody);
                     break;
 
                 case "roll":
-                    cmdChannel.SendMessage(GetRoll(cmdUser, cmdBody));
+                    SendMessage(cmdChannel, GetRoll(cmdUser, cmdBody));
                     break;
 
                 case "uptime":
-                    cmdChannel.SendMessage(UptimeMessage);
+                    SendMessage(cmdChannel, UptimeMessage);
                     break;
 
                 case "version":
-                    cmdChannel.SendMessage(BotVersion);
+                    SendMessage(cmdChannel, BotVersion);
                     break;
 
                 case "votestart":
-                    cmdChannel.SendMessage(voteMgr.Start(cmdBody));
+                    SendMessage(cmdChannel, voteMgr.Start(cmdBody));
                     break;
 
                 case "vote":
-                    var msg = voteMgr.AddVote(cmdBody);
-                    if (!string.IsNullOrEmpty(msg))
-                        cmdChannel.SendMessage(msg);
+                    SendMessage(cmdChannel, voteMgr.AddVote(cmdBody));
                     break;
 
                 case "votestop":
-                    cmdChannel.SendMessage(voteMgr.Stop());
+                    SendMessage(cmdChannel, voteMgr.Stop());
                     break;
             }
         }
         #endregion
+
+        private static void SendMessage(Channel channel, string msg)
+        {
+            if (string.IsNullOrEmpty(msg)) return;
+            Log(msg);
+            channel.SendMessage(msg);
+        }
+
+        private static void Log(string text, string user = "BOT")
+        {
+            Console.WriteLine($"{user}: {text}");
+        }
 
         #region Command Methods
         private static string GetRoll(User callee, string command)
