@@ -164,16 +164,16 @@ namespace DalaranBot
                 if (roll.Contains("d"))
                 {
                     // We're rolling dice
-                    int numDice, typeDice;
+                    uint numDice, typeDice;
                     var mods = roll.Split('d');
 
-                    if (!int.TryParse(mods[0], out numDice))
+                    if (!uint.TryParse(mods[0], out numDice))
                     {
                         isError = true;
                         break;
                     }
 
-                    if (!int.TryParse(mods[1], out typeDice))
+                    if (!uint.TryParse(mods[1], out typeDice))
                     {
                         isError = true;
                         break;
@@ -243,13 +243,13 @@ namespace DalaranBot
             return sb.ToString();
         }
 
-        private static IEnumerable<int> RollDice(int num, int type)
+        private static IEnumerable<int> RollDice(uint num, uint type)
         {
             var rand = new Random();
             var results = new List<int>();
 
             for (var i = 0; i < num; i++)
-                results.Add(rand.Next(type) + 1);
+                results.Add(rand.Next((int)type) + 1);
 
             return results;
         }
