@@ -1,29 +1,71 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 
 namespace DalaranBot
 {
     public static class Program
     {
+        private const string defaultTokenFile = "keys.txt";
+
+        /// <summary>
+        /// Application Entry Point
+        /// </summary>
+        /// <param name="args">Command line argument array</param>
         public static void Main(string[] args)
         {
-            string token = GetToken("../../keys.txt");
+            string tokenFile = null;
+            string logFile = null;
 
-            if (string.IsNullOrWhiteSpace(token))
+            // Check for parameters with associated data
+            for (var i = 0; i < args.Length - 1; i++)
             {
-                Console.WriteLine("Invalid Credentials. Shutting down...");
-                return;
+                if (args[i].Equals("-kf") && !string.IsNullOrWhiteSpace(args[i + 1]))
+                    tokenFile = args[i + 1];
+                if (args[i].Equals("-lf") && !string.IsNullOrWhiteSpace(args[i + 1]))
+                    logFile = args[i + 1];
             }
+
+            StartBot(tokenFile, logFile, args.Contains("-lts"));
+        }
+
+        #region Private Methods
+        private static void StartBot(string tokenFile, string logFile, bool logTimeStamp)
+        {
+            if (string.IsNullOrWhiteSpace(tokenFile))
+                tokenFile = defaultTokenFile;
 
             Console.WriteLine("Starting DalaranBot v{0}",
                 Assembly.GetExecutingAssembly().GetName().Version.ToString(3));
 
-            var bot = new DalaranBot(token);
-            bot.Start();
+            Console.WriteLine("Key File: {0}", tokenFile);
+
+            if (!string.IsNullOrWhiteSpace(logFile))
+                Console.WriteLine("Log File: {0}", logFile);
+
+            if (logTimeStamp)
+                Console.WriteLine("Timestamp Logging Enabled");
+
+            try
+            {
+                var bot = new DalaranBot(GetToken(tokenFile), logFile, logTimeStamp);
+                bot.Start();
+            }
+            catch (Discord.Net.HttpException ex)
+            {
+                if (ex.Message.Contains("401"))
+                    Console.WriteLine(
+                        "Invalid credentials. Your bot user's token should be placed in \"keys.txt\" or another file specified with -kf");
+                else throw;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Unhandled Exception: " + ex.Message);
+            }
         }
 
-        private static string GetToken(string tokenFilePath)
+        private static string GetToken(string tokenFilePath = defaultTokenFile)
         {
             var result = string.Empty;
 
@@ -39,5 +81,6 @@ namespace DalaranBot
 
             return result;
         }
+        #endregion
     }
 }

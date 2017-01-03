@@ -9,10 +9,12 @@ namespace DalaranBot
 {
     public class DalaranBot
     {
+        #region Fields
         private readonly DiscordClient client = new DiscordClient();
         private readonly DateTime startTime = DateTime.Now;
         private readonly VotingManager voteMgr = new VotingManager();
         private readonly LoggingManager logMgr = new LoggingManager();
+        #endregion
 
         #region Properties
         public string Token { get; }
@@ -55,17 +57,31 @@ namespace DalaranBot
         }
         #endregion Properties
 
+        #region Constructor
         /// <summary>
         /// Creates a new Dalaran Bot
         /// </summary>
         /// <param name="token">OAuth Token</param>
-        public DalaranBot(string token)
+        /// <param name="logFile">File for log output, leave null to disable logging to file</param>
+        /// <param name="logTimestamp">Enable or disable timestamp logging</param>
+        public DalaranBot(string token, string logFile = null, bool logTimestamp = true)
         {
             Token = token;
 
+            // Configure Logging Manager
+            if (!string.IsNullOrWhiteSpace(logFile))
+            {
+                logMgr.ToFile = true;
+                logMgr.FileName = logFile;
+            }
+
+            logMgr.ShowTimestamp = logTimestamp;
+
             client.MessageReceived += Client_MessageReceived;
         }
+        #endregion
 
+        #region Public Methods
         /// <summary>
         /// Connect to Discord
         /// </summary>
@@ -76,6 +92,7 @@ namespace DalaranBot
                 await client.Connect(Token, TokenType.Bot);
             });
         }
+        #endregion
 
         #region Event Handlers
         private void Client_MessageReceived(object sender, MessageEventArgs e)
@@ -128,6 +145,7 @@ namespace DalaranBot
         }
         #endregion
 
+        #region Private Methods
         private void SendMessage(Channel channel, string msg)
         {
             if (string.IsNullOrEmpty(msg)) return;
@@ -135,7 +153,6 @@ namespace DalaranBot
             channel.SendMessage(msg);
         }
 
-        #region Command Methods
         private static string GetRoll(User callee, string command)
         {
             var isError = false;
