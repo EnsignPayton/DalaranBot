@@ -10,8 +10,8 @@ namespace DalaranBot
     public class DalaranBot
     {
         #region Fields
-        private readonly DiscordClient client = new DiscordClient();
         private readonly DateTime startTime = DateTime.Now;
+        private readonly DiscordClient client = new DiscordClient();
         private readonly VotingManager voteMgr = new VotingManager();
         private readonly LoggingManager logMgr = new LoggingManager();
         #endregion
@@ -79,11 +79,6 @@ namespace DalaranBot
 
             client.Ready += Client_Ready;
             client.MessageReceived += Client_MessageReceived;
-        }
-
-        private void Client_Ready(object sender, EventArgs e)
-        {
-            Console.WriteLine("Connected to Discord");
         }
         #endregion
 
@@ -153,6 +148,11 @@ namespace DalaranBot
                     SendMessage(cmdChannel, voteMgr.Stop());
                     break;
             }
+        }
+
+        private void Client_Ready(object sender, EventArgs e)
+        {
+            Console.WriteLine("Connected to Discord");
         }
         #endregion
 
