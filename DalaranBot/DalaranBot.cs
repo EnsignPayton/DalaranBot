@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using Discord;
+using Discord.Audio;
 
 namespace DalaranBot
 {
@@ -14,6 +15,7 @@ namespace DalaranBot
         private readonly DiscordClient client = new DiscordClient();
         private readonly VotingManager voteMgr = new VotingManager();
         private readonly LoggingManager logMgr = new LoggingManager();
+        private IAudioClient audio;
         #endregion
 
         #region Properties
@@ -79,6 +81,8 @@ namespace DalaranBot
 
             client.Ready += Client_Ready;
             client.MessageReceived += Client_MessageReceived;
+
+            client.UsingAudio(x => x.Mode = AudioMode.Incoming);
         }
         #endregion
 
@@ -108,6 +112,7 @@ namespace DalaranBot
 
             var cmdUser = e.Message.User;
             var cmdChannel = e.Message.Channel;
+            var cmdServer = e.Message.Server;
             var cmdType = e.Message.Text.Substring(1).Split(' ')[0];
             var cmdBody = e.Message.Text.Substring(1 + cmdType.Length).Trim();
 
@@ -119,6 +124,22 @@ namespace DalaranBot
                     SendMessage(cmdChannel, HelpText);
                     break;
 
+                case "uptime":
+                    SendMessage(cmdChannel, UptimeMessage);
+                    break;
+
+                case "version":
+                    SendMessage(cmdChannel, BotVersion);
+                    break;
+
+                case "audiostart":
+                    StartAudio(cmdServer);
+                    break;
+
+                case "audiostop":
+                    StopAudio();
+                    break;
+
                 case "echo":
                     e.Message.Delete();
                     SendMessage(cmdChannel, cmdBody);
@@ -126,14 +147,6 @@ namespace DalaranBot
 
                 case "roll":
                     SendMessage(cmdChannel, GetRoll(cmdUser, cmdBody));
-                    break;
-
-                case "uptime":
-                    SendMessage(cmdChannel, UptimeMessage);
-                    break;
-
-                case "version":
-                    SendMessage(cmdChannel, BotVersion);
                     break;
 
                 case "votestart":
@@ -162,6 +175,29 @@ namespace DalaranBot
             if (string.IsNullOrEmpty(msg)) return;
             logMgr.Log(msg);
             channel.SendMessage(msg);
+        }
+
+        private async void StartAudio(Server serverToJoin, Channel channelToJoin = null)
+        {
+            if (channelToJoin == null)
+            {
+                foreach (var x in serverToJoin.VoiceChannels)
+                {
+                    if (!x.Name.Contains("General")) continue;
+                    channelToJoin = x;
+                    break;
+                }
+            }
+
+            if (channelToJoin == null)
+                channelToJoin = serverToJoin.VoiceChannels.First();
+
+            audio = await client.GetService<AudioService>().Join(channelToJoin);
+        }
+
+        private async void StopAudio()
+        {
+            await audio.Disconnect();
         }
 
         private static string GetRoll(User callee, string command)
