@@ -8,6 +8,7 @@ namespace DalaranBot
     public static class Program
     {
         private const string defaultTokenFile = "keys.txt";
+        private static DalaranBot bot;
 
         /// <summary>
         /// Application Entry Point
@@ -28,6 +29,20 @@ namespace DalaranBot
             }
 
             StartBot(tokenFile, logFile, args.Contains("-lts"));
+
+            while (true)
+            {
+                var input = Console.ReadLine();
+
+                switch (input?.ToUpper())
+                {
+                    case "EXIT":
+                    case "QUIT":
+                        bot.Disconnect();
+                        Environment.Exit(0);
+                        break;
+                }
+            }
         }
 
         #region Private Methods
@@ -49,8 +64,8 @@ namespace DalaranBot
 
             try
             {
-                var bot = new DalaranBot(GetToken(tokenFile), logFile, logTimeStamp);
-                bot.Start();
+                bot = new DalaranBot(GetToken(tokenFile), logFile, logTimeStamp);
+                bot.Connect();
             }
             catch (Discord.Net.HttpException ex)
             {

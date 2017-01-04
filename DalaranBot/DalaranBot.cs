@@ -77,7 +77,13 @@ namespace DalaranBot
 
             logMgr.ShowTimestamp = logTimestamp;
 
+            client.Ready += Client_Ready;
             client.MessageReceived += Client_MessageReceived;
+        }
+
+        private void Client_Ready(object sender, EventArgs e)
+        {
+            Console.WriteLine("Connected to Discord");
         }
         #endregion
 
@@ -85,12 +91,17 @@ namespace DalaranBot
         /// <summary>
         /// Connect to Discord
         /// </summary>
-        public void Start()
+        public void Connect()
         {
-            client.ExecuteAndWait(async () =>
-            {
-                await client.Connect(Token, TokenType.Bot);
-            });
+            client.Connect(Token, TokenType.Bot);
+        }
+
+        /// <summary>
+        /// Disconnect from Discord
+        /// </summary>
+        public void Disconnect()
+        {
+            client.ExecuteAndWait(() => client.Disconnect());
         }
         #endregion
 
