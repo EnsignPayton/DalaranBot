@@ -22,7 +22,7 @@ namespace DalaranBot.Modules
             await ReplyAsync(numbers.Sum().ToString());
         }
 
-        [Command("randon"), Alias("rand")]
+        [Command("random"), Alias("rand")]
         public async Task Rand(string range)
         {
             // Parse input
