@@ -1,103 +1,31 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
-using System.Reflection;
+using System.Threading.Tasks;
 
 namespace DalaranBot
 {
-    public static class Program
+    public class Program
     {
         private const string DefaultTokenFile = "keys.txt";
         private static DalaranBot _dalaranBot;
 
-        /// <summary>
-        /// Application Entry Point
-        /// </summary>
-        /// <param name="args">Command line argument array</param>
-        public static void Main(string[] args)
+        // The Discord API is fully asynchronous, so this app will be as well
+        public static void Main(string[] args) => StartAsync().GetAwaiter().GetResult();
+
+        public static async Task StartAsync()
         {
-            string tokenFile = null;
-            string logFile = null;
-
-            // Check for parameters with associated data
-            for (var i = 0; i < args.Length - 1; i++)
-            {
-                if (args[i].Equals("-kf") && !string.IsNullOrWhiteSpace(args[i + 1]))
-                    tokenFile = args[i + 1];
-                if (args[i].Equals("-lf") && !string.IsNullOrWhiteSpace(args[i + 1]))
-                    logFile = args[i + 1];
-            }
-
-            StartBot(tokenFile, logFile, args.Contains("-lts"));
-
-            while (true)
-            {
-                var input = Console.ReadLine();
-
-                switch (input?.ToUpper())
-                {
-                    case "EXIT":
-                    case "QUIT":
-                        _dalaranBot.Disconnect();
-                        Environment.Exit(0);
-                        break;
-                }
-            }
-        }
-
-        #region Private Methods
-
-        private static void StartBot(string tokenFile, string logFile, bool logTimeStamp)
-        {
-            if (string.IsNullOrWhiteSpace(tokenFile))
-                tokenFile = DefaultTokenFile;
-
-            Console.WriteLine("Starting DalaranBot v{0}",
-                Assembly.GetExecutingAssembly().GetName().Version.ToString(3));
-
-            Console.WriteLine("Key File: {0}", tokenFile);
-
-            if (!string.IsNullOrWhiteSpace(logFile))
-                Console.WriteLine("Log File: {0}", logFile);
-
-            if (logTimeStamp)
-                Console.WriteLine("Timestamp Logging Enabled");
-
             try
             {
-                _dalaranBot = new DalaranBot(GetToken(tokenFile), logFile, logTimeStamp);
-                _dalaranBot.Connect();
-            }
-            catch (Discord.Net.HttpException ex)
-            {
-                if (ex.Message.Contains("401"))
-                    Console.WriteLine(
-                        "Invalid credentials. Your bot user's token should be placed in \"keys.txt\" or another file specified with -kf");
-                else throw;
+                _dalaranBot = new DalaranBot(File.ReadAllText(DefaultTokenFile));
+
+                await _dalaranBot.Connect();
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Unhandled Exception: " + ex.Message);
+                Console.WriteLine(ex.Message);
             }
+
+            await Task.Delay(-1);
         }
-
-        private static string GetToken(string tokenFilePath = DefaultTokenFile)
-        {
-            var result = string.Empty;
-
-            if (!File.Exists(tokenFilePath)) return result;
-
-            var tokenFile = new FileInfo(tokenFilePath);
-
-            // 64 MB is plenty
-            if (tokenFile.Length >= 1024*1024*64) return result;
-
-            using (var sr = tokenFile.OpenText())
-                result = sr.ReadLine();
-
-            return result;
-        }
-
-        #endregion
     }
 }
