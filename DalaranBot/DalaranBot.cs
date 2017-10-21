@@ -10,16 +10,19 @@ namespace DalaranBot
     public class DalaranBot
     {
         #region Fields
-        private readonly DateTime startTime = DateTime.Now;
-        private readonly DiscordClient client = new DiscordClient();
-        private readonly VotingManager voteMgr = new VotingManager();
-        private readonly LoggingManager logMgr = new LoggingManager();
+
+        private readonly DateTime _startTime = DateTime.Now;
+        private readonly DiscordClient _discordClient = new DiscordClient();
+        private readonly VotingManager _votingManager = new VotingManager();
+        private readonly LoggingManager _loggingManager = new LoggingManager();
+
         #endregion
 
         #region Properties
+
         public string Token { get; }
 
-        public TimeSpan Uptime => DateTime.Now - startTime;
+        public TimeSpan Uptime => DateTime.Now - _startTime;
         public string BotVersion => "DalaranBot Version " +
             Assembly.GetExecutingAssembly().GetName().Version.ToString(3);
 
@@ -55,9 +58,11 @@ namespace DalaranBot
                 return sb.ToString();
             }
         }
+
         #endregion Properties
 
         #region Constructor
+
         /// <summary>
         /// Creates a new Dalaran Bot
         /// </summary>
@@ -71,24 +76,26 @@ namespace DalaranBot
             // Configure Logging Manager
             if (!string.IsNullOrWhiteSpace(logFile))
             {
-                logMgr.ToFile = true;
-                logMgr.FileName = logFile;
+                _loggingManager.ToFile = true;
+                _loggingManager.FileName = logFile;
             }
 
-            logMgr.ShowTimestamp = logTimestamp;
+            _loggingManager.ShowTimestamp = logTimestamp;
 
-            client.Ready += Client_Ready;
-            client.MessageReceived += Client_MessageReceived;
+            _discordClient.Ready += DiscordClientReady;
+            _discordClient.MessageReceived += DiscordClientMessageReceived;
         }
+
         #endregion
 
         #region Public Methods
+
         /// <summary>
         /// Connect to Discord
         /// </summary>
         public void Connect()
         {
-            client.Connect(Token, TokenType.Bot);
+            _discordClient.Connect(Token, TokenType.Bot);
         }
 
         /// <summary>
@@ -96,12 +103,14 @@ namespace DalaranBot
         /// </summary>
         public void Disconnect()
         {
-            client.ExecuteAndWait(() => client.Disconnect());
+            _discordClient.ExecuteAndWait(() => _discordClient.Disconnect());
         }
+
         #endregion
 
         #region Event Handlers
-        private void Client_MessageReceived(object sender, MessageEventArgs e)
+
+        private void DiscordClientMessageReceived(object sender, MessageEventArgs e)
         {
             // Do nothing if we wrote the message, or if it doesn't start with the comnmand character
             if (e.Message.IsAuthor || !e.Message.Text.StartsWith(".")) return;
@@ -111,7 +120,7 @@ namespace DalaranBot
             var cmdType = e.Message.Text.Substring(1).Split(' ')[0];
             var cmdBody = e.Message.Text.Substring(1 + cmdType.Length).Trim();
 
-            logMgr.Log($".{cmdType} {cmdBody}", cmdUser);
+            _loggingManager.Log($".{cmdType} {cmdBody}", cmdUser);
 
             switch (cmdType)
             {
@@ -137,30 +146,32 @@ namespace DalaranBot
                     break;
 
                 case "votestart":
-                    SendMessage(cmdChannel, voteMgr.Start(cmdBody));
+                    SendMessage(cmdChannel, _votingManager.Start(cmdBody));
                     break;
 
                 case "vote":
-                    SendMessage(cmdChannel, voteMgr.AddVote(cmdBody));
+                    SendMessage(cmdChannel, _votingManager.AddVote(cmdBody));
                     break;
 
                 case "votestop":
-                    SendMessage(cmdChannel, voteMgr.Stop());
+                    SendMessage(cmdChannel, _votingManager.Stop());
                     break;
             }
         }
 
-        private void Client_Ready(object sender, EventArgs e)
+        private void DiscordClientReady(object sender, EventArgs e)
         {
             Console.WriteLine("Connected to Discord");
         }
+
         #endregion
 
         #region Private Methods
+
         private void SendMessage(Channel channel, string msg)
         {
             if (string.IsNullOrEmpty(msg)) return;
-            logMgr.Log(msg);
+            _loggingManager.Log(msg);
             channel.SendMessage(msg);
         }
 
@@ -271,6 +282,7 @@ namespace DalaranBot
 
             return rand.Next(iFrom, iTo);
         }
+
         #endregion
     }
 }

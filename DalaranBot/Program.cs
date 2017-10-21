@@ -7,8 +7,8 @@ namespace DalaranBot
 {
     public static class Program
     {
-        private const string defaultTokenFile = "keys.txt";
-        private static DalaranBot bot;
+        private const string DefaultTokenFile = "keys.txt";
+        private static DalaranBot _dalaranBot;
 
         /// <summary>
         /// Application Entry Point
@@ -38,7 +38,7 @@ namespace DalaranBot
                 {
                     case "EXIT":
                     case "QUIT":
-                        bot.Disconnect();
+                        _dalaranBot.Disconnect();
                         Environment.Exit(0);
                         break;
                 }
@@ -46,10 +46,11 @@ namespace DalaranBot
         }
 
         #region Private Methods
+
         private static void StartBot(string tokenFile, string logFile, bool logTimeStamp)
         {
             if (string.IsNullOrWhiteSpace(tokenFile))
-                tokenFile = defaultTokenFile;
+                tokenFile = DefaultTokenFile;
 
             Console.WriteLine("Starting DalaranBot v{0}",
                 Assembly.GetExecutingAssembly().GetName().Version.ToString(3));
@@ -64,8 +65,8 @@ namespace DalaranBot
 
             try
             {
-                bot = new DalaranBot(GetToken(tokenFile), logFile, logTimeStamp);
-                bot.Connect();
+                _dalaranBot = new DalaranBot(GetToken(tokenFile), logFile, logTimeStamp);
+                _dalaranBot.Connect();
             }
             catch (Discord.Net.HttpException ex)
             {
@@ -80,7 +81,7 @@ namespace DalaranBot
             }
         }
 
-        private static string GetToken(string tokenFilePath = defaultTokenFile)
+        private static string GetToken(string tokenFilePath = DefaultTokenFile)
         {
             var result = string.Empty;
 
@@ -96,6 +97,7 @@ namespace DalaranBot
 
             return result;
         }
+
         #endregion
     }
 }

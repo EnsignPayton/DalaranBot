@@ -9,36 +9,37 @@ namespace DalaranBot
     /// </summary>
     public class VotingManager
     {
-        private bool isVoting;
-        private int totalVotes;
-        private List<Category> categories = new List<Category>();
+        private bool _isVoting;
+        private int _totalVotes;
+        private List<Category> _categories = new List<Category>();
 
         #region Methods
+
         public string Start(string cmd)
         {
-            if (isVoting) return "Voting has already started.";
+            if (_isVoting) return "Voting has already started.";
 
             var catTexts = cmd.Split('"').Where(s => !string.IsNullOrWhiteSpace(s));
 
             foreach (var cat in catTexts)
-                categories.Add(new Category { Text = cat });
+                _categories.Add(new Category { Text = cat });
 
-            if (categories.Count == 0)
+            if (_categories.Count == 0)
                 return "No categories specified.";
 
             var sb = new StringBuilder("Voting has started:");
 
-            for (var i = 0; i < categories.Count; i++)
-                sb.Append($"\n{i + 1}. {categories[i].Text}");
+            for (var i = 0; i < _categories.Count; i++)
+                sb.Append($"\n{i + 1}. {_categories[i].Text}");
 
-            isVoting = true;
+            _isVoting = true;
 
             return sb.ToString();
         }
 
         public string AddVote(string cmd)
         {
-            if (!isVoting) return "There are no votes in progress";
+            if (!_isVoting) return "There are no votes in progress";
 
             int iCat;
             if (!int.TryParse(cmd, out iCat))
@@ -46,43 +47,44 @@ namespace DalaranBot
 
             iCat -= 1;
 
-            if (iCat < 0 || iCat >= categories.Count)
+            if (iCat < 0 || iCat >= _categories.Count)
                 return $"Invalid category: {iCat + 1} is not a valid category number.";
 
-            categories[iCat].AddVote();
+            _categories[iCat].AddVote();
 
-            totalVotes++;
+            _totalVotes++;
 
             return string.Empty;
         }
 
         public string Stop()
         {
-            if (!isVoting) return "There are no votes in progress to stop.";
+            if (!_isVoting) return "There are no votes in progress to stop.";
 
-            var maxCats = categories.GetMaxCategories();
+            var maxCats = _categories.GetMaxCategories();
             var sb = new StringBuilder("Voting has ended.");
 
-            for (var i = 0; i < categories.Count; i++)
+            for (var i = 0; i < _categories.Count; i++)
             {
                 sb.Append("\n");
-                if (maxCats.Contains(categories[i])) sb.Append("**");
+                if (maxCats.Contains(_categories[i])) sb.Append("**");
 
-                sb.Append($"{i + 1}. \"{categories[i].Text}\": ");
-                sb.Append($"{categories[i].Votes} Vote");
-                if (categories[i].Votes != 1) sb.Append("s");
-                sb.Append($" ({(int)((double)categories[i].Votes / (double)totalVotes * 100.0)}%)");
+                sb.Append($"{i + 1}. \"{_categories[i].Text}\": ");
+                sb.Append($"{_categories[i].Votes} Vote");
+                if (_categories[i].Votes != 1) sb.Append("s");
+                sb.Append($" ({(int)((double)_categories[i].Votes / (double)_totalVotes * 100.0)}%)");
 
-                isVoting = false;
+                _isVoting = false;
 
-                if (maxCats.Contains(categories[i])) sb.Append("**");
+                if (maxCats.Contains(_categories[i])) sb.Append("**");
             }
 
-            totalVotes = 0;
-            categories = new List<Category>();
+            _totalVotes = 0;
+            _categories = new List<Category>();
 
             return sb.ToString();
         }
+
         #endregion
     }
 

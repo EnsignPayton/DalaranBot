@@ -24,6 +24,7 @@ namespace DalaranBot
         }
 
         #region Private Methods
+
         private string BuildMessage(string msg, User user = null)
         {
             if (msg == null) return null;
@@ -39,7 +40,7 @@ namespace DalaranBot
             return sb.ToString();
         }
 
-        private void LogToConsole(string msg)
+        private static void LogToConsole(string msg)
         {
             try
             {
@@ -68,6 +69,7 @@ namespace DalaranBot
                 if (ToConsole) LogToConsole("Unhandled Exception: " + ex.Message);
             }
         }
+
         #endregion
     }
 }
