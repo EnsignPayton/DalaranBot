@@ -89,6 +89,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DalaranBot.cs" />
+    <Compile Include="Modules\HelpModule.cs" />
+    <Compile Include="Modules\MathModule.cs" />
     <Compile Include="Modules\TestModule.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
