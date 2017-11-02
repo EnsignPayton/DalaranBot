@@ -8,7 +8,7 @@ namespace DalaranBot.Modules
     [Name("Math")]
     public class MathModule : ModuleBase<SocketCommandContext>
     {
-        private readonly Random _random = new Random();
+        private static readonly Random Random = new Random();
 
         [Command("square")]
         public async Task Square(double x)
@@ -34,7 +34,7 @@ namespace DalaranBot.Modules
             if (!int.TryParse(bounds[1], out upper)) return;
             if (lower > upper) return;
 
-            var result = _random.Next(lower, upper);
+            var result = Random.Next(lower, upper);
 
             await ReplyAsync(result.ToString());
         }
@@ -68,7 +68,7 @@ namespace DalaranBot.Modules
 
                     for (int i = 0; i < count; i++)
                     {
-                        result += _random.Next(1, type);
+                        result += Random.Next(1, type);
                     }
 
                     continue;

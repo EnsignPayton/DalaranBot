@@ -9,6 +9,7 @@ namespace DalaranBot
 {
     public class DalaranBot
     {
+        private static readonly NLog.ILogger Logger = NLog.LogManager.GetCurrentClassLogger();
         private readonly DiscordSocketClient _discordClient;
         private readonly CommandService _commandService;
         private readonly string _token;
@@ -41,12 +42,14 @@ namespace DalaranBot
         {
             var message = arg as SocketUserMessage;
             if (message == null) return;
-            if (message.Author == _discordClient.CurrentUser) return;
+            if (message.Author == _discordClient.CurrentUser ||
+                message.Author.IsBot) return;
 
             int argPos = 0;
             if (message.HasCharPrefix(_prefix, ref argPos) ||
                 message.HasMentionPrefix(_discordClient.CurrentUser, ref argPos))
             {
+                Logger.Info("Responding to @" + message.Author.Username + ": " + message.Content);
                 var context = new SocketCommandContext(_discordClient, message);
                 await _commandService.ExecuteAsync(context, argPos);
             }
